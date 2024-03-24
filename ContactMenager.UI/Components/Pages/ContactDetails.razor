@@ -1,0 +1,50 @@
+﻿@page "/contact-details/{ContactId}"
+@using ContactMenager.UI.Services.Interfaces
+@using ContactMenager.UI.ViewModels
+@inject IContactService ContactService
+@inject NavigationManager NavigationManager
+
+<h3>Contact Details</h3>
+
+@if (contact != null)
+{
+    <div>
+        <h4>@contact.FirstName @contact.LastName</h4>
+        <p>Email: @contact.Email</p>
+        <p>Phone: @contact.PhoneNumber</p>
+        <!-- Dodaj więcej pól zgodnie z potrzebami -->
+    </div>
+}
+else if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>Contact not found.</p>
+}
+
+@code {
+    [Parameter]
+    public string ContactId { get; set; }
+
+    private long ContactIdAsLong;
+    private ContactViewModel contact;
+    private bool isLoading = true;
+
+    // metoda która wykonuje się podczas ładowania/inicjalizacji widoku, w moim przypadku pobiera dane o szczegółach kontaktu
+    protected override async Task OnInitializedAsync()
+    {
+        if (long.TryParse(ContactId, out long parsedId))
+        {
+            ContactIdAsLong = parsedId; 
+            contact = await ContactService.GetContactById(ContactIdAsLong);
+        }
+        else
+        {
+            // opcjonalnie można obsłużyć 
+        }
+
+        isLoading = false;
+    }
+}

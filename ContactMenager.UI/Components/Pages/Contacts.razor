@@ -1,0 +1,58 @@
+﻿@page "/contacts"
+@using ContactMenager.UI.Services.Interfaces
+@using ContactMenager.UI.ViewModels
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<h3>Contacts</h3>
+
+<button class="btn-secondary" @onclick="NavigateToCreate">Add new !</button>
+
+@if (contacts != null)
+{
+    <div class="list-group">
+        @foreach (var item in contacts)
+        {
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" @onclick="() => NavigateToDetailsAsync(item.Id.ToString())" style="cursor: pointer;">
+                <div>
+                    <h5 class="mb-1">@item.FirstName @item.LastName</h5>
+                    <p class="mb-1">@item.Email</p>
+                </div>
+                <small>Details &rarr;</small>
+            </div>
+        }
+    </div>
+}
+else if(isLoding)
+{
+    <p>Loading...</p>
+}
+else{
+    <p>The list is empty.</p>
+}
+@code {
+    private ContactViewModel[] contacts;
+    [Inject]
+    private IContactService contactService { get; set; }
+    private bool isLoding = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        contacts = await contactService.GetContacts();
+        isLoding = false;
+    }
+
+    private Task NavigateToDetailsAsync(string contactId)
+    {
+        NavigationManager.NavigateTo($"/contact-details/{contactId}");
+        return Task.CompletedTask;
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/contact-create");
+    }
+}

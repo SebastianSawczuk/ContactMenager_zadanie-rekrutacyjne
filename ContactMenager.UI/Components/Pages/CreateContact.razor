@@ -1,0 +1,89 @@
+﻿@page "/contact-create"
+@using ContactMenager.UI.ViewModels
+@using ContactMenager.UI.Services.Interfaces
+@inject IContactService ContactService
+@inject ILogger<ContactViewModel> Logger
+@rendermode InteractiveServer
+
+
+<h3>CreateContact</h3>
+
+<EditForm Model="contact" OnSubmit="Submit" FormName="contact-create">
+    <div>
+        <label>First Name:
+        <InputText @bind-Value="contact.FirstName"></InputText>
+        </label>
+    </div>
+    <div>
+        <label>Last Name:
+            <InputText @bind-Value="contact.LastName"></InputText>
+        </label>
+    </div>
+    <div>
+        <label>
+            Phone Number:
+            <InputNumber @bind-Value="contact.PhoneNumber"></InputNumber>
+        </label>
+    </div>
+    <div>
+        <label>
+            Email:
+            <InputText @bind-Value="contact.Email"></InputText>
+        </label>
+    </div>
+    <div>
+        <label>
+            Type:
+            <InputSelect @bind-Value="contact.Type"  @onchange="typeCheck">
+                <option value="@ContactTypeEnum.business">Business</option>
+                <option value="@ContactTypeEnum.personal">Personal</option>
+                <option value="@ContactTypeEnum.other">Other</option>
+            </InputSelect>
+        </label>
+    </div>
+    @if (otherChecked)
+    {
+    <div>
+        <label>
+            Other:
+            <InputText @bind-Value="contact.Other"></InputText>
+        </label>
+    </div>
+    }
+    <div>
+        <label>
+            Email:
+            <InputDate @bind-Value="contact.BirthDate"></InputDate>
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    public ContactViewModel? contact { get; set; }
+    public bool otherChecked = false;
+
+    protected override async Task OnInitializedAsync() => contact ??= new();
+
+
+    //miało służyć do wyświetlania pola Other, ale nie działa
+    private void typeCheck(ChangeEventArgs e)
+    {
+        if (contact.Type.Equals(ContactTypeEnum.other))
+        {
+            otherChecked = true;
+        }
+    }
+
+    private async Task Submit()
+    {
+        if (contact != null)
+        {
+            Console.WriteLine(contact.ToString());
+            Logger.LogInformation("Submitting contact: FirstName = {FirstName}, LastName = {LastName}", contact.FirstName, contact.LastName);
+            await ContactService.AddContact(contact);
+        }
+    }
+}
